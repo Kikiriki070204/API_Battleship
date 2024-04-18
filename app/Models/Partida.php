@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Estado;
 use App\Models\User;
 use App\Models\Resultado;
+use App\Models\Ataque;
 class Partida extends Model
 {
     use HasFactory;
@@ -35,5 +36,10 @@ class Partida extends Model
     public function resultado()
     {
         return $this->hasMany(Resultado::class,'partida_id');
+    }
+
+    public function ataque()
+    {
+        return $this->hasMany(Ataque::class,'partida_id');
     }
 }

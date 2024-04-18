@@ -25,7 +25,7 @@ Route::post('register',[AuthController::class,'register']);
 Route::get('activate/{user}',[AuthController::class,'activate'])->name('activate')->middleware('signed');
 
 Route::post('login',[AuthController::class,'login'])->name('login');
-Route::post('verify/{id}',[AuthController::class,'verify'])->name('verify');
+Route::post('verify',[AuthController::class,'verify'])->name('verify');
 Route::post('logout',[AuthController::class,'logout'])->name('logout');
 
 //Partidas

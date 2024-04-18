@@ -56,4 +56,14 @@ class PartidasController extends Controller
         return response()->json([ "msg"=>"Usuario no autorizado"],404);
 
     }
+
+    public function disponibles()
+    {
+        $user = auth()->user();
+        if($user)
+        {
+        $partidas =  Partida::all()->where('estado_id',1);
+        return response()->json([ "partidas"=>$partidas],200);
+        }
+    }
 }

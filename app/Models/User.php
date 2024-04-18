@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Partida;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\Resultado;
+use App\Models\Ataque;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -72,5 +73,13 @@ class User extends Authenticatable implements JWTSubject
     public function resultado_perdedor()
     {
         return $this->hasMany(Resultado::class,'perdedor_id');
+    }
+    public function ataque_hitter()
+    {
+        return $this->hasMany(Ataque::class,'hitter_id');
+    }
+    public function ataque_target()
+    {
+        return $this->hasMany(Ataque::class,'target_id');
     }
 }

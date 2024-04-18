@@ -97,13 +97,19 @@ class AuthController extends Controller
 
          Mail::to($user->email)->send(new VerificationEmail($code));
             
-         return response()->json(['token'=>$token,'user'=>$user]);
+         return response()->json(['token'=>$token,
+         'id'=>$user->id,
+         'verified_token'=>$user->verified_token,
+         'email'=>$user->email,
+        'password'=>$user->password]);
     }
 
-    public function verify(Request $request, int $id)
+    public function verify(Request $request)
     {
         $validate = Validator::make($request->all(),
         [
+            'email'=>'required',
+            'password'=>'required',
             'code'=>'required'
         ]);
 
@@ -113,20 +119,26 @@ class AuthController extends Controller
             "msg"=>"Errores de validación"],422);
         }
 
-        $user = User::find($id);
+        $email = $request->email;
+        $password= $request->password;
         $code = $request->code;
-        $token= $user->verified_token;
-       if($user)
-       {
-        if(Hash::check($code, $token))
-        {
-            $user->update(['verified'=>true]);
-
-            return 'Success!!';
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            $token = $user->verified_token;
+            $credentials = ['email' => $email, 'password' => $password];
+             if (!$token = Auth::guard('api')->attempt($credentials)) {
+            return response()->json(['error' => 'Credenciales incorrectas'], 401);
+            }
+            if(Hash::check($code, $token))
+            {
+                $user->update(['verified'=>true]);
+    
+                return response()->json(['usuario'=>$user],201);
+            }
+            return response()->json(['msg'=>"El código no coincide!"],401);
         }
-        return response()->json(['msg'=>"El código no coincide!"],401);
-       }
-       return response()->json([ "msg"=>"Persona no encontrada"],404);
+        
+        return response()->json(['message' => 'Usuario no encontrado'], 404);
     }
     
     public function logout(Request $request)
