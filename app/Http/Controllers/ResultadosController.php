@@ -18,7 +18,7 @@ class ResultadosController extends Controller
         {
             
         $id = $user->id;
-        $ganador_battles = DB::table('resultados')
+        $perdedor_battles = DB::table('resultados')
             ->where('perdedor_id', $id)
             ->join('users as perdedor', 'resultados.perdedor_id', '=', 'perdedor.id')
             ->join('users as ganador', 'resultados.ganador_id', '=', 'ganador.id')
@@ -28,7 +28,7 @@ class ResultadosController extends Controller
 
 
         return response()->json([
-            "partidas" => $ganador_battles
+            "partidas" => $perdedor_battles
         ], 200);
         }
         return response()->json([

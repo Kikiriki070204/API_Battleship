@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\MyEvent;
 use App\Models\Lobby;
 use App\Models\Partida;
+use App\Models\Resultado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -126,6 +127,12 @@ class LobbiesController extends Controller
                         $lobby->puntos2 -= 1;
                         if ($lobby->puntos2 <= 0) {
                             $lobby->ganador = $lobby->jugador1;
+
+                            $resultados = Resultado::create([
+                                'partida_id'=>$id,
+                                'ganador_id'=>$lobby->jugador1,
+                                'perdedor_id'=>$lobby->jugador2
+                            ]);
                         }
                     break;
                 }
@@ -141,6 +148,11 @@ class LobbiesController extends Controller
                         $lobby->puntos1 -= 1;
                         if ($lobby->puntos1 <= 0) {
                             $lobby->ganador = $lobby->jugador2;
+                            $resultados = Resultado::create([
+                                'partida_id'=>$id,
+                                'ganador_id'=>$lobby->jugador2,
+                                'perdedor_id'=>$lobby->jugador1
+                            ]);
                         }
                     break;
                 }

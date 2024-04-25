@@ -148,7 +148,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user) {
-            $user->update(['verified' => false]);
+            $user->update(['is_verified' => false]);
         }
 
         return response()->json(['message' => 'Logout exitoso'], 200);

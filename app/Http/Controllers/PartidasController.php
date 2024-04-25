@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\MyEvent;
+use App\Events\PartidasEvent;
 use App\Models\Lobby;
 use Illuminate\Http\Request;
 use App\Models\Partida;
@@ -68,44 +69,50 @@ class PartidasController extends Controller
             $partida->lobby_id = $lobby->_id;
             $partida->save();
 
+            event(new PartidasEvent());
+
         return response()->json($partida,200);
     }
     return response()->json([ "msg"=>"No estás autorizado"],401);
     }
 
+ 
     public function join(Request $request, int $id)
     {
         $user = auth()->user();
         if($user)
         {
             $user_id = $user->id;
-
+    
             $partida = Partida::find($id);
-
+    
             if($partida)
             {
-
                 $lobby = Lobby::where('_id', $partida->lobby_id)->get()->first();
+    
+                // Restablecer el estado del lobby
                 $lobby->jugador2 = $user_id;
                 $lobby->turno = $user_id;
                 $lobby->puntos2 = 15;
                 $lobby->puntos1 = 15;
+                // Asegúrate de restablecer cualquier otro estado necesario
+    
                 $lobby->save();
-
-                $partida->invitado_id = $user_id;
-                $partida->estado_id = 2;
+    
+                // Restablecer el resultado de la partida
+                $partida->resultado = null;
                 $partida->save();
-
+    
                 event(new MyEvent("sasa"));
-
+    
                 return response()->json([ "msg"=>"Has entrado a la partida"],200);
             }
             return response()->json([ "msg"=>"Partida no encontrada"],404);
-
+    
         }
         return response()->json([ "msg"=>"Usuario no autorizado"],404);
-
     }
+
 
     public function disponibles()
     {
