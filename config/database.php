@@ -92,6 +92,11 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        'mongodb' => [
+            'driver' => 'mongodb',
+            'dsn' => env('DB_URI', 'mongodb+srv://myAtlasDBUser:kikiriki07db@myatlasclusteredu.akjega6.mongodb.net/'),
+            'database' => 'mongo_battleship',
+        ],
 
     ],
 

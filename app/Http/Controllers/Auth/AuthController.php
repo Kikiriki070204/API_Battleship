@@ -101,7 +101,7 @@ class AuthController extends Controller
          'id'=>$user->id,
          'verified_token'=>$user->verified_token,
          'email'=>$user->email,
-        'password'=>$user->password]);
+        'password'=>$request->password],200);
     }
 
     public function verify(Request $request)
@@ -124,12 +124,12 @@ class AuthController extends Controller
         $code = $request->code;
         $user = User::where('email', $email)->first();
         if ($user) {
-            $token = $user->verified_token;
+            $verified_token = $user->verified_token;
             $credentials = ['email' => $email, 'password' => $password];
-             if (!$token = Auth::guard('api')->attempt($credentials)) {
+             if (!Auth::guard('api')->attempt($credentials)) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
             }
-            if(Hash::check($code, $token))
+            if(Hash::check($code, $verified_token))
             {
                 $user->update(['verified'=>true]);
     
@@ -154,4 +154,15 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logout exitoso'], 200);
 
     }
+
+    public function me()
+    {
+        $user = Auth::guard('api')->user();
+        if ($user) {
+            return response()->json($user, 200);
+        }
+        return response()->json([], 401);
+            
+    }
+
 }

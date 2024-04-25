@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('ataques', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('x');
-            $table->unsignedBigInteger('y');
+            $table->char('y');
             $table->unsignedBigInteger('hitter_id');
             $table->unsignedBigInteger('target_id');
             $table->foreign('hitter_id')->references('id')->on('users')->onDelete('cascade');

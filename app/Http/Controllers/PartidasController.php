@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MyEvent;
+use App\Models\Lobby;
 use Illuminate\Http\Request;
 use App\Models\Partida;
+use Illuminate\Support\Facades\Log;
 use Validator;
 
 class PartidasController extends Controller
@@ -12,17 +15,60 @@ class PartidasController extends Controller
     {
         $this->middleware('auth:api');
     }
-    public function store(Request $request, int $id)
+    public function store(Request $request)
     {
         $user = auth()->user();
         if($user)
         {
-        $usuario = $id;
-        $partida = Partida::create([
-            'usuario_id'=>$usuario
-        ]);
+            $usuario = $user->id;
 
-        return response()->json([ "partida"=>$partida],200);
+            $lobby = new Lobby();
+            $lobby->jugador1 = $usuario;
+
+
+            $collection1 = collect([]);
+            for ($i = 0; $i < 25; $i++)
+            {
+                $collection1 = $collection1->push(0);
+            } 
+            for ($i = 25; $i < 40; $i++)
+            {
+                $collection1 = $collection1->push(1);
+            } 
+            $collection1 = $collection1->shuffle();
+            $collection1_final = $collection1->split(5); 
+
+            $lobby->tablero1 = $collection1_final->toArray();
+
+            $collection2 = collect([]);
+            for ($i = 0; $i < 25; $i++)
+            {
+                $collection2 = $collection2->push(0);
+            } 
+            for ($i = 25; $i < 40; $i++)
+            {
+                $collection2 = $collection2->push(1);
+            } 
+            $collection2 = $collection2->shuffle();
+            $collection2_final = $collection2->split(5);
+            //for ($i = 0; $i < 5; $i++)
+            //{
+            //    $collection2_slice = $collection1->slice($i*8, 8);
+            //    $collection2_final->push($collection2_slice->toArray());
+            //} 
+
+            $lobby->tablero2 = $collection2_final->toArray();
+
+            $lobby->save();
+
+            Log::debug($lobby->_id);
+            
+            $partida = new Partida();
+            $partida->usuario_id = $usuario; 
+            $partida->lobby_id = $lobby->_id;
+            $partida->save();
+
+        return response()->json($partida,200);
     }
     return response()->json([ "msg"=>"No estás autorizado"],401);
     }
@@ -30,7 +76,6 @@ class PartidasController extends Controller
     public function join(Request $request, int $id)
     {
         $user = auth()->user();
-
         if($user)
         {
             $user_id = $user->id;
@@ -39,16 +84,21 @@ class PartidasController extends Controller
 
             if($partida)
             {
-                $partida_user = $partida->usuario_id;
-                $partida_invitado = $partida->invitado_id;
-                if($user_id == $partida_user && $partida_invitado == null)
-                {
-                    return response()->json([ "msg"=>"Espera que alguien se una a la partida"],401);
-                }
-                
-                $partida->update(['invitado_id'=>$user_id]);
-                $partida->update(['estado_id'=> 2]);
 
+                $lobby = Lobby::where('_id', $partida->lobby_id)->get()->first();
+                $lobby->jugador2 = $user_id;
+                $lobby->turno = $user_id;
+                $lobby->puntos2 = 15;
+                $lobby->puntos1 = 15;
+                $lobby->save();
+
+                $partida->invitado_id = $user_id;
+                $partida->estado_id = 2;
+                $partida->save();
+
+                event(new MyEvent("sasa"));
+
+                return response()->json([ "msg"=>"Has entrado a la partida"],200);
             }
             return response()->json([ "msg"=>"Partida no encontrada"],404);
 
@@ -62,8 +112,8 @@ class PartidasController extends Controller
         $user = auth()->user();
         if($user)
         {
-        $partidas =  Partida::all()->where('estado_id',1);
-        return response()->json([ "partidas"=>$partidas],200);
+        $partidas =  Partida::where('estado_id',1)->get();
+        return response()->json($partidas,200);
         }
     }
 }

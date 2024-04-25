@@ -22,6 +22,8 @@ return new class extends Migration
             $table->unsignedBigInteger('estado_id')->default(1);
             $table->foreign('estado_id')->references('id')->on('estado_partida')->onDelete('cascade');
             $table->timestamps();
+
+            $table->string('lobby_id')->nullable();
         });
     }
 
