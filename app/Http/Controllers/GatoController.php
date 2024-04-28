@@ -111,11 +111,12 @@ class GatoController extends Controller
                 $jugadorActual = $gato->turno == $gato->jugadorO ? 1 : 2;
                 $tablero[$request->rowIndex][$request->colIndex] = $jugadorActual;
 
-                $gato->tablero = $tablero;
+                $gato->tablero1 = $tablero;
                 $gato->turno = $gato->turno == $gato->jugadorO ? $gato->jugadorX : $gato->jugadorO;
 
                 $gato->save();
                 event(new MyEvent("ataque"));
+
                 return response()->json($gato, 200);
             }
         }
