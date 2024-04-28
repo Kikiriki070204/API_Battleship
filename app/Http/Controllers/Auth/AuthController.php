@@ -131,7 +131,7 @@ class AuthController extends Controller
             }
             if(Hash::check($code, $verified_token))
             {
-                $user->update(['verified'=>true]);
+                $user->update(['is_verified'=>true]);
     
                 return response()->json(['usuario'=>$user],201);
             }
