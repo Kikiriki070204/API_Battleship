@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 use App\Events\MyEvent;
+use App\Events\BatallonEvento;
+use App\Events\PartidasEvent;
 use App\Models\Gato;
 use App\Models\Partida;
 use Illuminate\Http\Request;
@@ -42,7 +44,7 @@ class PartidasGatoController extends Controller
             $partida->gato_id = $gato->_id;
             $partida->save();
 
-            //event(new PartidasEvent());
+            event(new PartidasEvent());
 
         return response()->json($partida,200);
     }
@@ -63,18 +65,17 @@ class PartidasGatoController extends Controller
             {
                 $gato = Gato::where('_id', $partida->gato_id)->get()->first();
     
-                // Restablecer el estado del gato
                 $gato->jugadorX = $user_id;
                 $gato->turno = $user_id;
-                // Asegúrate de restablecer cualquier otro estado necesario
+                
     
                 $gato->save();
-    
-                // Restablecer el resultado de la partida
+
                 $partida->invitado_id = $user_id;
+                $partida->estado_id = 2;
                 $partida->save();
     
-                event(new MyEvent("alguien se une"));
+                event(new MyEvent("alguien se une", $partida->id));
     
                 return response()->json([ "msg"=>"Has entrado a la partida"],200);
             }

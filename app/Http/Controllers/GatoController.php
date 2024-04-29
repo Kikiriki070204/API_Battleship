@@ -103,6 +103,7 @@ class GatoController extends Controller
         if (!$gato) {
             return response()->json(["msg" => "Usuario no autorizado"], 404);
         }
+
         $user = Auth::guard('api')->user();
         if ($user && $gato->turno == $user->id) {
             $tablero = $gato->tablero1;
@@ -114,13 +115,67 @@ class GatoController extends Controller
                 $gato->tablero1 = $tablero;
                 $gato->turno = $gato->turno == $gato->jugadorO ? $gato->jugadorX : $gato->jugadorO;
 
-                $gato->save();
-                event(new MyEvent("ataque"));
+                $ganador = null;
 
-                return response()->json($gato, 200);
+                //horizontales
+            if ($tablero[0][0] == $jugadorActual && $tablero[0][1] == $jugadorActual && $tablero[0][2] == $jugadorActual) {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else
+            if ($tablero[1][0] == $jugadorActual && $tablero[1][1] == $jugadorActual && $tablero[1][2] == $jugadorActual) {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else
+            if ($tablero[2][0] == $jugadorActual && $tablero[2][1] == $jugadorActual && $tablero[2][2] == $jugadorActual) {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else //verticales
+            if ($tablero[0][0] == $jugadorActual && $tablero[1][0] == $jugadorActual && $tablero[2][0] == $jugadorActual)
+            {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else 
+            if ($tablero[0][1] == $jugadorActual && $tablero[1][1] == $jugadorActual && $tablero[2][1] == $jugadorActual)
+            {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else 
+            if ($tablero[0][2] == $jugadorActual && $tablero[1][2] == $jugadorActual && $tablero[2][2] == $jugadorActual)
+            {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else //diagonles
+            if ($tablero[0][0] == $jugadorActual && $tablero[1][1] == $jugadorActual && $tablero[2][2] == $jugadorActual)
+            {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
+            } else 
+            if ($tablero[0][2] == $jugadorActual && $tablero[1][1] == $jugadorActual && $tablero[2][0] == $jugadorActual)
+            {
+                $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
             }
-        }
-        return response()->json(["msg" => "Usuario no autorizado"], 401);
+            
+
+            if ($ganador !== null) {
+                $gato->ganador = $ganador;
+            }
+
+                $gato->save();
+                event(new MyEvent("ataque",$partida->id));
+
+                $resultados = new Resultado();
+                if ($gato->ganador == $ganador->jugadorO)
+                {
+                 $resultados->partida_id = $partida->id;
+                 $resultados->ganador_id = $gato->jugadorO;
+                 $resultados->perdedor_id = $gato->jugadorX;  
+                }
+                else
+                {
+                    $resultados->partida_id = $partida->id;
+                    $resultados->ganador_id = $gato->jugadorX;
+                    $resultados->perdedor_id = $gato->jugadorO;
+                }
+
+                $resultados->save();
+            }
+
+            return response()->json($gato,200);
+    }
+        return response()->json(["msg" => "Nop"], 401);
     }
 
 /**

@@ -12,15 +12,17 @@ class MyEvent implements ShouldBroadcast
   use Dispatchable, InteractsWithSockets, SerializesModels;
 
   public $message;
+  public $partida_id;
 
-  public function __construct($message)
+  public function __construct($message, $partida_id)
   {
       $this->message = $message;
+      $this->partida_id = $partida_id;
   }
 
   public function broadcastOn()
   {
-      return ['my-channel'];
+      return ["my-channel-{$this->partida_id}"];
   }
 
   public function broadcastAs()
