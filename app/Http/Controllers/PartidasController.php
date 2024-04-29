@@ -52,12 +52,7 @@ class PartidasController extends Controller
             } 
             $collection2 = $collection2->shuffle();
             $collection2_final = $collection2->split(5);
-            //for ($i = 0; $i < 5; $i++)
-            //{
-            //    $collection2_slice = $collection1->slice($i*8, 8);
-            //    $collection2_final->push($collection2_slice->toArray());
-            //} 
-
+           
             $lobby->tablero2 = $collection2_final->toArray();
 
             $lobby->save();

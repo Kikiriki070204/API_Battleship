@@ -27,53 +27,7 @@ class GatoController extends Controller
      */
     public function store(Request $request)
     {
-        //$request->validate([
-        //    "jugador1" => "required|exists:App\Models\User,id"
-        //]);
-//
-        //$lobby = new Lobby();
-        //$lobby->jugador1 = $request->jugador1;
-//
-//
-        //$collection1 = collect([]);
-        //for ($i = 0; $i < 25; $i++)
-        //{
-        //    $collection1 = $collection1->push(0);
-        //} 
-        //for ($i = 25; $i < 40; $i++)
-        //{
-        //    $collection1 = $collection1->push(1);
-        //} 
-        //$collection1 = $collection1->shuffle();
-        //$collection1_final = collect([]);
-        //for ($i = 0; $i < 5; $i++)
-        //{
-        //    $collection1_slice = $collection1->slice($i*8, 8);
-        //    $collection1_final->push($collection1_slice);
-        //} 
-        //$lobby->tablero1 = $collection1_final->toArray();
-//
-        //$collection2 = collect([]);
-        //for ($i = 0; $i < 25; $i++)
-        //{
-        //    $collection2 = $collection2->push(0);
-        //} 
-        //for ($i = 25; $i < 40; $i++)
-        //{
-        //    $collection2 = $collection2->push(1);
-        //} 
-        //$collection2 = $collection1->shuffle();
-        //$collection2_final = collect([]);
-        //for ($i = 0; $i < 5; $i++)
-        //{
-        //    $collection2_slice = $collection1->slice($i*8, 8);
-        //    $collection2_final->push($collection2_slice);
-        //} 
-//
-        //$lobby->tablero2 = $collection2_final->toArray();
-//
-        //$lobby->save();
-
+       
     }
 
     /**
@@ -114,6 +68,8 @@ class GatoController extends Controller
 
                 $gato->tablero1 = $tablero;
                 $gato->turno = $gato->turno == $gato->jugadorO ? $gato->jugadorX : $gato->jugadorO;
+                $empate = false;
+                $gato->empate = $empate;
 
                 $ganador = null;
 
@@ -148,30 +104,54 @@ class GatoController extends Controller
                 $ganador = $jugadorActual == 2 ? $gato->jugadorX : $gato->jugadorO;
             }
             
+            
 
             if ($ganador !== null) {
                 $gato->ganador = $ganador;
+            }else
+            {
+
             }
 
                 $gato->save();
                 event(new MyEvent("ataque",$partida->id));
-
-                $resultados = new Resultado();
-                if ($gato->ganador == $ganador->jugadorO)
+                if($gato->ganador == null)
                 {
-                 $resultados->partida_id = $partida->id;
-                 $resultados->ganador_id = $gato->jugadorO;
-                 $resultados->perdedor_id = $gato->jugadorX;  
-                }
-                else
-                {
-                    $resultados->partida_id = $partida->id;
-                    $resultados->ganador_id = $gato->jugadorX;
-                    $resultados->perdedor_id = $gato->jugadorO;
-                }
+                   $tableroFull = true;
+                    for ($i = 0; $i < 3; $i++) {
+                        for ($j = 0; $j < 3; $j++) {
+                            if ($tablero[$i][$j] == 0) {
+                                $tableroFull = false;
+                                break;
+                            }
+                        }
+                    }
 
-                $resultados->save();
+                    if ($tableroFull) {
+                        $gato->empate = true;
+                        $gato->save();
+                    }
+                }
             }
+            if($gato->ganador != null)
+            {
+            $resultados = new Resultado();
+            if ($gato->ganador == $gato->jugadorO)
+            {
+            $resultados->partida_id = $partida->id;
+            $resultados->ganador_id = $gato->jugadorO;
+            $resultados->perdedor_id = $gato->jugadorX;  
+            }
+            else
+            {
+                $resultados->partida_id = $partida->id;
+                $resultados->ganador_id = $gato->jugadorX;
+                $resultados->perdedor_id = $gato->jugadorO;
+            }
+
+             $resultados->save();
+            }
+
 
             return response()->json($gato,200);
     }
